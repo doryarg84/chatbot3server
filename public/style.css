@@ -1,4 +1,4 @@
-/* style.css - קובץ CSS יוקרתי לצ'אטבוט Node */
+/* style.css - גרסה משופרת עם רספונסיביות מובייל מעולה */
 @import url("https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap");
 
 :root {
@@ -14,6 +14,10 @@
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.7);
   --blur: blur(20px);
+  --border-radius: 24px;
+  --spacing-sm: 12px;
+  --spacing-md: 20px;
+  --spacing-lg: 24px;
 }
 
 * {
@@ -33,6 +37,8 @@ body {
   line-height: 1.6;
   overflow: hidden;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .wrap {
@@ -41,12 +47,12 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  gap: 20px;
+  padding: clamp(12px, 4vw, var(--spacing-lg));
+  gap: clamp(16px, 3vw, var(--spacing-lg));
 }
 
 h1 {
-  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-size: clamp(1.8rem, 6vw, 3.5rem);
   font-weight: 700;
   background: var(--accent-primary);
   -webkit-background-clip: text;
@@ -54,40 +60,45 @@ h1 {
   background-clip: text;
   text-align: center;
   letter-spacing: -0.02em;
-  margin-bottom: 0;
-  text-shadow: var(--shadow-sm);
+  margin: 0 auto clamp(0, 2vw, 12px) 0;
 }
 
 .topbar {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: clamp(8px, 2vw, var(--spacing-sm));
   align-items: center;
+  justify-content: center;
   background: var(--glass-bg);
   backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  padding: 12px 20px;
+  border-radius: clamp(16px, 4vw, var(--border-radius));
+  padding: clamp(12px, 3vw, var(--spacing-md));
   box-shadow: var(--shadow-md);
+  order: 3;
 }
 
 #newChatBtn,
 #deleteChatBtn {
+  flex: 1;
+  min-width: 120px;
   background: var(--accent-primary);
   color: var(--text-primary);
   border: none;
-  padding: 12px 20px;
-  border-radius: 14px;
+  padding: clamp(10px, 3vw, 14px) clamp(16px, 4vw, 24px);
+  border-radius: clamp(12px, 3vw, 16px);
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: clamp(0.85rem, 2.5vw, 1rem);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 #newChatBtn:hover,
 #deleteChatBtn:hover {
-  transform: translateY(-2px);
+  transform: translateY(-2px) scale(1.02);
   box-shadow: var(--shadow-lg);
   background: var(--accent-hover);
 }
@@ -97,39 +108,43 @@ h1 {
 }
 
 #chatSelect {
+  flex: 1 0 clamp(140px, 30vw, 200px);
   background: var(--glass-bg);
   backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
   color: var(--text-primary);
-  padding: 12px 16px;
-  border-radius: 14px;
-  font-size: 0.95rem;
-  min-width: 180px;
+  padding: clamp(10px, 3vw, 14px) clamp(12px, 3vw, 18px);
+  border-radius: clamp(12px, 3vw, 16px);
+  font-size: clamp(0.85rem, 2.5vw, 0.95rem);
   cursor: pointer;
+  min-width: 0;
 }
 
 #chatSelect option {
   background: #1a1a2e;
   color: var(--text-primary);
+  padding: 8px;
 }
 
 .chat {
   flex: 1;
+  min-height: 0;
   background: var(--glass-bg);
   backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  padding: 24px;
+  border-radius: clamp(20px, 5vw, var(--border-radius));
+  padding: clamp(16px, 4vw, var(--spacing-lg));
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: clamp(12px, 2vw, 16px);
   box-shadow: var(--shadow-lg);
   scroll-behavior: smooth;
+  order: 2;
 }
 
 .chat::-webkit-scrollbar {
-  width: 6px;
+  width: clamp(4px, 1.5vw, 6px);
 }
 
 .chat::-webkit-scrollbar-track {
@@ -148,13 +163,15 @@ h1 {
 
 .bar {
   display: flex;
-  gap: 12px;
+  gap: clamp(8px, 2vw, 12px);
+  align-items: stretch;
   background: var(--glass-bg);
   backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
-  padding: 16px 20px;
+  border-radius: clamp(20px, 5vw, var(--border-radius));
+  padding: clamp(12px, 3vw, 16px);
   box-shadow: var(--shadow-md);
+  order: 4;
 }
 
 #input {
@@ -162,12 +179,13 @@ h1 {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
-  padding: 16px 20px;
-  border-radius: 20px;
-  font-size: 1rem;
+  padding: clamp(12px, 4vw, 18px) clamp(16px, 4vw, 24px);
+  border-radius: clamp(16px, 4vw, 22px);
+  font-size: clamp(0.9rem, 3vw, 1rem);
   outline: none;
   transition: all 0.3s ease;
   direction: rtl;
+  min-height: 48px;
 }
 
 #input:focus {
@@ -180,16 +198,18 @@ h1 {
   background: var(--accent-primary);
   color: var(--text-primary);
   border: none;
-  padding: 16px 24px;
-  border-radius: 20px;
+  padding: clamp(12px, 4vw, 18px) clamp(20px, 5vw, 28px);
+  border-radius: clamp(16px, 4vw, 22px);
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-size: 1rem;
-  min-width: 80px;
+  font-size: clamp(0.9rem, 3vw, 1rem);
+  flex-shrink: 0;
+  min-height: 48px;
+  min-width: clamp(70px, 18vw, 90px);
 }
 
-#send:hover {
+#send:hover:not(:disabled) {
   transform: scale(1.05);
   box-shadow: var(--shadow-lg);
 }
@@ -201,38 +221,44 @@ h1 {
 .hint {
   text-align: center;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: clamp(0.8rem, 2vw, 0.9rem);
   font-style: italic;
   opacity: 0.8;
+  order: 1;
+  padding: clamp(8px, 2vw, 12px);
 }
 
-/* סגנון להודעות צ'אט - להוסיף ב-JS */
+/* סגנון הודעות צ'אט משופר למובייל */
 .message {
   display: flex;
-  gap: 12px;
+  gap: clamp(8px, 2vw, 12px);
   animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  max-width: 80%;
+  max-width: clamp(85%, 90vw, 80%);
+  margin: 0 clamp(8px, 2vw, 12px);
 }
 
 .message.user {
   flex-direction: row-reverse;
   margin-left: auto;
+  margin-right: 0;
 }
 
 .message.bot {
   flex-direction: row;
+  margin-right: auto;
+  margin-left: 0;
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
+  width: clamp(32px, 8vw, 42px);
+  height: clamp(32px, 8vw, 42px);
   border-radius: 50%;
   background: var(--accent-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 3vw, 1.15rem);
   flex-shrink: 0;
 }
 
@@ -240,11 +266,13 @@ h1 {
   background: var(--glass-bg);
   backdrop-filter: var(--blur);
   border: 1px solid var(--glass-border);
-  padding: 16px 20px;
-  border-radius: 24px;
+  padding: clamp(12px, 3vw, 18px) clamp(16px, 4vw, 24px);
+  border-radius: clamp(20px, 5vw, 28px);
   box-shadow: var(--shadow-md);
-  line-height: 1.6;
+  line-height: 1.55;
   position: relative;
+  word-wrap: break-word;
+  hyphens: auto;
 }
 
 .user .message-content {
@@ -255,50 +283,81 @@ h1 {
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-/* Responsive */
+/* Media Queries מתקדמות למובייל */
 @media (max-width: 768px) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
   .wrap {
-    padding: 12px;
-    gap: 16px;
+    gap: clamp(12px, 4vw, 20px);
+    padding: clamp(8px, 3vw, 20px);
   }
 
   .topbar {
     flex-direction: column;
-    gap: 8px;
-    padding: 16px;
+    align-items: stretch;
+    padding: clamp(16px, 5vw, 24px);
+  }
+
+  #newChatBtn,
+  #deleteChatBtn {
+    flex: none;
+    width: 100%;
   }
 
   #chatSelect {
+    order: -1;
     width: 100%;
-    min-width: unset;
   }
 
   .bar {
-    padding: 12px 16px;
-  }
-
-  #input,
-  #send {
-    padding: 14px 16px;
-    font-size: 0.95rem;
+    padding: clamp(10px, 4vw, 16px);
+    position: sticky;
+    bottom: env(safe-area-inset-bottom);
   }
 }
 
 @media (max-width: 480px) {
-  h1 {
-    font-size: 2rem;
+  .chat {
+    padding: clamp(12px, 5vw, 20px);
+    margin-bottom: clamp(8px, 3vw, 12px);
   }
 
-  .chat {
-    padding: 16px;
-    border-radius: 20px;
+  h1 {
+    letter-spacing: -0.03em;
+  }
+
+  .message {
+    max-width: 95vw;
+    gap: clamp(6px, 3vw, 10px);
+  }
+
+  .message-content {
+    padding: clamp(10px, 4vw, 16px) clamp(14px, 5vw, 20px);
+  }
+}
+
+/* תמיכה ב-Landscape מובייל */
+@media (max-height: 500px) and (orientation: landscape) {
+  .wrap {
+    padding: 8px;
+  }
+
+  .topbar,
+  .hint {
+    display: none;
+  }
+
+  h1 {
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
   }
 }
