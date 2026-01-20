@@ -6,31 +6,46 @@ import OpenAI from "openai";
 const app = express();
 app.use(express.json());
 
+// ===============================
+// 📁 Static files
+// ===============================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// מגיש את תיקיית public (HTML/CSS/JS)
 app.use(express.static(path.join(__dirname, "public")));
 
-// ✅ OpenAI client
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-// ✅ Health check
-app.get("/healthz", (req, res) => res.status(200).send("ok"));
+// ===============================
+// ❤️ Health Check (Keep Alive)
+// ===============================
+app.get("/healthz", (req, res) => {
+  res.status(200).send("ok");
+});
 
 // ===============================
-// ✅ NEW: ניהול צ'אטים והיסטוריה
+// 🤖 Lazy OpenAI Client (CRITICAL)
+// ===============================
+let openaiClient;
+
+function getOpenAI() {
+  if (!openaiClient) {
+    openaiClient = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+    console.log("✅ OpenAI client initialized");
+  }
+  return openaiClient;
+}
+
+// ===============================
+// 💬 Chat State (In-Memory)
 // ===============================
 /**
- * chats = Map<chatId, Array<{role: "system"|"user"|"assistant", content: string}>>
- * כל chatId שומר מערך messages של שיחה אחת.
+ * chats = Map<chatId, messages[]>
  */
 const chats = new Map();
 
-//הגדרת פרומפט מערכת וקבועים להיסטוריית הצ'אט
-// ✅ NEW: קבועים לשליטה על גודל ההיסטוריה (כדי לא להתפוצץ בטוקנים)
 const SYSTEM_PROMPT = "אתה צ'אטבוט עוזר, ענה בקצרה וברורה.";
-const MAX_TURNS = 20; // כמה זוגות user+assistant נשמור
+const MAX_TURNS = 20;
 
 function getOrCreateChat(chatId) {
   if (!chats.has(chatId)) {
@@ -40,17 +55,17 @@ function getOrCreateChat(chatId) {
 }
 
 function trimHistory(messages) {
-  // משאירים system + אחריו עד MAX_TURNS*2 הודעות (user+assistant)
   const system = messages[0]?.role === "system" ? [messages[0]] : [];
   const rest = messages.filter((m) => m.role !== "system");
 
-  const maxMsgs = MAX_TURNS * 2;
-  const trimmedRest = rest.slice(-maxMsgs);
+  const maxMessages = MAX_TURNS * 2;
+  const trimmedRest = rest.slice(-maxMessages);
 
   return [...system, ...trimmedRest];
 }
+
 // ===============================
-// ✅ NEW: מחיקת צ'אט מהשרת
+// 🗑️ Delete chat
 // ===============================
 app.delete("/api/chat/:chatId", (req, res) => {
   const { chatId } = req.params;
@@ -67,57 +82,60 @@ app.delete("/api/chat/:chatId", (req, res) => {
   res.json({ ok: true });
 });
 
-// (לא חובה, אבל נחמד) לראות אילו צ'אטים קיימים בזיכרון השרת
+// ===============================
+// 📋 List chats (debug)
+// ===============================
 app.get("/api/chats", (req, res) => {
   res.json({ chatIds: Array.from(chats.keys()) });
 });
 
+// ===============================
+// 💬 Main Chat Endpoint
+// ===============================
 app.post("/api/chat", async (req, res) => {
   try {
-    // ✅ NEW: מקבלים גם chatId
     const { chatId, message } = req.body || {};
 
     if (!chatId || typeof chatId !== "string") {
       return res.status(400).json({ error: "chatId is required" });
     }
+
     if (!message || typeof message !== "string") {
       return res.status(400).json({ error: "message is required" });
     }
 
-    // ✅ NEW: טוענים/יוצרים היסטוריה לצ'אט הזה
+    // Load or create chat
     const history = getOrCreateChat(chatId);
 
-    // מוסיפים הודעת משתמש להיסטוריה
     history.push({ role: "user", content: message });
+    chats.set(chatId, trimHistory(history));
 
-    // חותכים היסטוריה אם גדלה מדי
-    const trimmed = trimHistory(history);
-    chats.set(chatId, trimmed);
-
-    // ✅ NEW: קריאה עם messages (היסטוריה) כדי לקבל שיחה מתמשכת
-    const completion = await client.chat.completions.create({
+    // 🔥 OpenAI call (lazy)
+    const completion = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: chats.get(chatId),
     });
 
-    const reply = completion.choices?.[0]?.message?.content?.trim() || "";
+    const reply =
+      completion?.choices?.[0]?.message?.content?.trim() ||
+      "לא הצלחתי לנסח תשובה.";
 
-    // מוסיפים תשובת בוט להיסטוריה
     const updated = chats.get(chatId);
     updated.push({ role: "assistant", content: reply });
-
-    // חותכים שוב אם צריך
     chats.set(chatId, trimHistory(updated));
 
     res.json({ reply });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Chat error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
 
-// מאזין על פורט
+// ===============================
+// 🚀 Server start
+// ===============================
 const port = process.env.PORT || 3000;
+
 app.listen(port, "0.0.0.0", () => {
-  console.log("Server listening on port", port);
+  console.log(`🚀 Server listening on port ${port}`);
 });
